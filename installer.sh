@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bi#!/bin/bash
 
 set -e
 
@@ -33,7 +33,7 @@ install_panel() {
   # Configurar firewall
   ufw allow OpenSSH
   ufw allow 'Nginx Full'
-  ufw enable
+  ufw --force enable
   
   # Instalar dependencias
   curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
@@ -245,14 +245,17 @@ menu() {
     echo -n "* Ingresa el número de la opción que deseas: "
     read -r action
 
-    [ -z "$action" ] && output "Es necesario ingresar una opción" && continue
-
-    valid_input=("$(for ((i = 0; i <= ${#actions[@]} - 1)); do echo "${i}"; done)")
-    [[ ! " ${valid_input[*]} " =~ ${action} ]] && output "Opción inválida"
-    [[ " ${valid_input[*]} " =~ ${action} ]] && done=true && IFS=";" read -r i1 i2 <<<"${actions[$action]}" && $i1 && [[ -n $i2 ]] && $i2
+    if [[ "$action" =~ ^[0-3]$ ]]; then
+      done=true
+      IFS=";" read -r i1 i2 <<<"${actions[$action]}"
+      $i1
+      if [[ -n $i2 ]]; then $i2; fi
+    else
+      output "* Opción inválida. Por favor, elige una opción válida."
+    fi
   done
 }
 
-# Ejecutar el script
+# Inicio del script
 welcome
 menu
